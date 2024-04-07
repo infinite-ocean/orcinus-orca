@@ -46,6 +46,7 @@ https.get(
             `,
           { concurrency: CONCURRENCY }
         );
+        await pool.sql`CREATE INDEX fred_datasets_name_code ON fred_datasets (name, code);`;
         await pool.end();
         process.exit(0);
       });
