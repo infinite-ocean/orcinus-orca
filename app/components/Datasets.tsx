@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FREDDatasets, FREDDatasetsSchema } from "@/app/lib/Dataset";
 
@@ -34,7 +34,7 @@ export default function Datasets() {
   }, [lastCode, lastName]);
 
   return (
-    <Suspense fallback={"Loading..."}>
+    <>
       {datasets.map((dataset) => (
         <Link
           key={dataset.code}
@@ -44,6 +44,6 @@ export default function Datasets() {
           {dataset.name}
         </Link>
       ))}
-    </Suspense>
+    </>
   );
 }
