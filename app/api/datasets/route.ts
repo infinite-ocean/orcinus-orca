@@ -8,7 +8,6 @@ export async function GET(request: NextRequest) {
   const last_code = request.nextUrl.searchParams.get("last_code");
   const limit = request.nextUrl.searchParams.get("limit");
   try {
-    await sql.connect();
     const data = await sql<FREDDataset>`
         SELECT *
         FROM fred_datasets
@@ -16,7 +15,6 @@ export async function GET(request: NextRequest) {
         ORDER BY name ASC, code ASC
         LIMIT ${limit};
     `;
-    await sql.end();
     return NextResponse.json(data.rows);
   } catch (error) {
     console.error(error);
