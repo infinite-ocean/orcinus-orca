@@ -1,49 +1,63 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FREDDatasets, FREDDatasetsSchema } from "@/app/lib/Dataset";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FREDDataset, FREDDatasetsSchema } from "@/app/lib/Dataset";
 
 export default function Datasets() {
-  const [lastName, setLastName] = useState("");
-  const [lastCode, setLastCode] = useState("");
-  const [datasets, setDatasets] = useState<FREDDatasets>([]);
-  useEffect(() => {
-    const abortController = new AbortController();
+  const [loading, setLoading] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [datasets, setDatasets] = useState<FREDDataset[]>([]);
+
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  const fetchDatasets = useCallback(() => {
+    setLoading(true);
+    const last = datasets.at(-1);
     fetch(
       `/api/datasets?${new URLSearchParams({
-        last_name: lastName,
-        last_code: lastCode,
-        limit: "200",
-      }).toString()}`,
-      { signal: abortController.signal }
+        last_name: last?.name || "",
+        last_code: last?.code || "",
+      }).toString()}`
     )
       .then((response) => response.json())
-      .then((datasets) => FREDDatasetsSchema.safeParseAsync(datasets))
-      .then((parsed) => {
-        if (parsed.success) {
-          //   const last = parsed.data.slice(-1)[0];
-          //   setLastName(last.name);
-          //   setLastCode(last.code);
-          //   setDatasets(datasets.concat(parsed.data));
-          setDatasets(parsed.data);
-        } else throw parsed.error;
+      .then((datasets) => FREDDatasetsSchema.parseAsync(datasets))
+      .then(({ completed, datasets }) => {
+        setCompleted(completed);
+        setDatasets((prevDatasets) => [...prevDatasets, ...datasets]);
       })
-      .catch((error) => console.error(error));
-    return () => abortController.abort();
-  }, [lastCode, lastName]);
+      .catch((error) => console.error(error))
+      .finally(() => setLoading(false));
+  }, [datasets]);
+
+  // infinite scroll effect
+  useEffect(() => {
+    const loaderCurrent = loaderRef.current;
+    if (loaderCurrent) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          completed || fetchDatasets();
+        }
+      });
+      observer.observe(loaderCurrent);
+      return () => {
+        observer.unobserve(loaderCurrent);
+      };
+    }
+  }, [completed, fetchDatasets]);
 
   return (
     <>
       {datasets.map((dataset) => (
         <Link
           key={dataset.code}
-          className="block p-1 m-1 border hover:bg-slate-500"
+          className="block p-3 border-t first-of-type:border-none hover:bg-slate-500"
           href={`/dataset/${dataset.code}`}
         >
           {dataset.name}
         </Link>
       ))}
+      <div ref={loaderRef}>{loading && "Loading..."}</div>
     </>
   );
 }

@@ -9,7 +9,9 @@ const FREDDatasetSchema = z.object({
   to_date: z.string(),
 });
 
-export const FREDDatasetsSchema = z.array(FREDDatasetSchema);
+export const FREDDatasetsSchema = z.object({
+  completed: z.boolean(),
+  datasets: z.array(FREDDatasetSchema),
+});
 
 export type FREDDataset = z.infer<typeof FREDDatasetSchema>;
-export type FREDDatasets = z.infer<typeof FREDDatasetsSchema>;

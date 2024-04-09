@@ -17,12 +17,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} flex`}>
-        <nav className="w-80 p-2">
+    <html lang="en" className="h-full">
+      <body className={`${inter.className} flex h-full`}>
+        <main className="flex-1">{children}</main>
+        <nav className="w-80 border-l overflow-auto h-full">
           <Datasets />
         </nav>
-        <main className="flex-1">{children}</main>
       </body>
     </html>
   );
