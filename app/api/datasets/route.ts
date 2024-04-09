@@ -5,20 +5,24 @@ import { FREDDataset } from "@/app/lib/Dataset";
 export async function GET(request: NextRequest) {
   const last_name = request.nextUrl.searchParams.get("last_name");
   const last_code = request.nextUrl.searchParams.get("last_code");
-  const LIMIT = 100;
+  const query = `%${request.nextUrl.searchParams.get("query")}%`;
+  const limit = 100;
   try {
     const data = await sql<FREDDataset>`
         SELECT *
         FROM fred_datasets
-        WHERE name > ${last_name} OR ( name = ${last_name} AND code > ${last_code} )
+        WHERE name LIKE ${query} AND ( name > ${last_name} OR ( name = ${last_name} AND code > ${last_code} ) )
         ORDER BY name ASC, code ASC
-        LIMIT ${LIMIT};
+        LIMIT ${limit};
     `;
-    return NextResponse.json({
-      completed: data.rows.length < LIMIT,
-      datasets: data.rows,
-    });
+    return NextResponse.json(
+      {
+        completed: data.rows.length < limit,
+        datasets: data.rows,
+      },
+      { status: 200 }
+    );
   } catch (error) {
-    return NextResponse.error();
+    return NextResponse.json(error, { status: 400 });
   }
 }
