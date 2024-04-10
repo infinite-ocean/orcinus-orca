@@ -7,13 +7,15 @@ import {
   faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FREDDataset, FREDDatasetsSchema } from "@/app/lib/Dataset";
+import { type DatasetMetadataType, DatasetListSchema } from "@/app/lib/Dataset";
 import { clsx } from "clsx";
+import { usePathname } from "next/navigation";
 
 export default function Datasets() {
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [completed, setCompleted] = useState(false);
-  const [datasets, setDatasets] = useState<FREDDataset[]>([]);
+  const [datasets, setDatasets] = useState<DatasetMetadataType[]>([]);
   const [query, setQuery] = useState<string | null>(null);
 
   const loaderRef = useRef<HTMLDivElement>(null);
@@ -29,7 +31,7 @@ export default function Datasets() {
       }).toString()}`
     )
       .then((response) => response.json())
-      .then((datasets) => FREDDatasetsSchema.parseAsync(datasets))
+      .then((datasets) => DatasetListSchema.parseAsync(datasets))
       .then(({ completed, datasets }) => {
         setCompleted(completed);
         setDatasets((prevDatasets) => [...prevDatasets, ...datasets]);
@@ -74,7 +76,9 @@ export default function Datasets() {
       {datasets.map((dataset) => (
         <Link
           key={dataset.code}
-          className="block p-3 border-t first-of-type:border-none hover:bg-slate-500"
+          className={`block p-3 border-t first-of-type:border-none hover:bg-slate-500 ${
+            pathname === `/dataset/${dataset.code}` ? "bg-slate-500" : ""
+          }`}
           href={`/dataset/${dataset.code}`}
         >
           {dataset.name}
