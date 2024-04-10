@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faMagnifyingGlass,
-  faSpinner,
-} from "@fortawesome/free-solid-svg-icons";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type DatasetMetadataType, DatasetListSchema } from "@/app/lib/Dataset";
 import { clsx } from "clsx";
 import { usePathname } from "next/navigation";
+import { IconButton } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
 export default function Datasets() {
   const pathname = usePathname();
@@ -66,12 +65,14 @@ export default function Datasets() {
     <>
       <form action={search} className="border-b flex sticky top-0 bg-white">
         <input name="query" className="flex-1 p-1 m-1" />
-        <button
+        <IconButton
           type="submit"
-          className="p-2 border-l text-sky-500 hover:text-sky-700"
+          color="primary"
+          size="small"
+          aria-label="search"
         >
-          <FontAwesomeIcon icon={faMagnifyingGlass} />
-        </button>
+          <SearchIcon />
+        </IconButton>
       </form>
       {datasets.map((dataset) => (
         <Link
